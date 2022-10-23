@@ -1,4 +1,4 @@
-package com.project.base.response.api;
+package com.project.base.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@Builder
 public class ApiResponse extends ResponseEntity<ApiResponse.Payload> {
     public ApiResponse(int code, String message) {
         super(new Payload(code, message, null), HttpStatus.OK);
@@ -21,7 +20,7 @@ public class ApiResponse extends ResponseEntity<ApiResponse.Payload> {
     @NoArgsConstructor
     @Data
     public static class Payload {
-        private int httpCode;
+        private int code;
         private String message;
         private Object data;
     }

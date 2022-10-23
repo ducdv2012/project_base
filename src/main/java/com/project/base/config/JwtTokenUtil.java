@@ -1,5 +1,6 @@
 package com.project.base.config;
 
+import com.project.base.model.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -31,9 +32,9 @@ public class JwtTokenUtil implements Serializable {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(Users users) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, users.getUsername());
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {

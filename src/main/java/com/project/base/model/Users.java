@@ -1,12 +1,12 @@
 package com.project.base.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -15,7 +15,8 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Users implements Serializable, UserDetails {
+public class Users extends Audits implements Serializable, UserDetails {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
@@ -23,6 +24,8 @@ public class Users implements Serializable, UserDetails {
     private String username;
     @Column(name = "password")
     private String password;
+    @Column(name = "email")
+    private String email;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

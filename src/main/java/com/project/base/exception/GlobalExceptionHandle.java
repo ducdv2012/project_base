@@ -1,6 +1,6 @@
 package com.project.base.exception;
 
-import com.project.base.response.api.ApiResponse;
+import com.project.base.api.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,5 +17,10 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
     @ExceptionHandler({AuthExceptionHandle.class})
     public ApiResponse authExceptionHandle(final NotBearerTokenHandle ex, final WebRequest request) {
         return new ApiResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler({RefreshTokenExceptionHandle.class})
+    public ApiResponse refreshTokenHandle(RefreshTokenExceptionHandle ex, WebRequest request) {
+        return new ApiResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     }
 }
