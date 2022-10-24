@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.webjars.NotFoundException;
 
 @Component
 public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
@@ -22,5 +23,10 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
     @ExceptionHandler({RefreshTokenExceptionHandle.class})
     public ApiResponse refreshTokenHandle(RefreshTokenExceptionHandle ex, WebRequest request) {
         return new ApiResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler({NotFoundException.class})
+    public ApiResponse notFoundExceptionHandle(NotFoundException ex, WebRequest request) {
+        return new ApiResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     }
 }

@@ -20,8 +20,6 @@ public class JwtTokenUtil implements Serializable {
     private String secretKey;
     @Value("${token.validity}")
     private Long validityToken;
-    @Value("${refresh.token.validity}")
-    private Long validityRefreshToken;
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
@@ -34,6 +32,8 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(Users users) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", users.getId());
+        claims.put("username", users.getUsername());
         return doGenerateToken(claims, users.getUsername());
     }
 

@@ -4,18 +4,24 @@ import com.project.base.api.request.RefreshTokenRequest;
 import com.project.base.api.response.AccessTokenResponse;
 import com.project.base.api.response.ApiResponse;
 import com.project.base.config.JwtTokenUtil;
+import com.project.base.exception.AuthExceptionHandle;
 import com.project.base.model.RefreshToken;
 import com.project.base.model.Users;
+import com.project.base.repository.UserRepository;
 import com.project.base.request.LoginRequest;
 import com.project.base.service.interfaces.AuthService;
 import com.project.base.service.interfaces.RefreshTokenService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +30,27 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class AuthServiceImpl implements AuthService {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private RefreshTokenService refreshTokenService;
+public class AuthServiceImpl implements AuthService, UserDetailsService {
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final RefreshTokenService refreshTokenService;
+    private final UserRepository userRepository;
+
+    public AuthServiceImpl(@Lazy AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, RefreshTokenService refreshTokenService, UserRepository userRepository) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.refreshTokenService = refreshTokenService;
+        this.userRepository = userRepository;
+    }
+
+    @SneakyThrows
+    @Override
+    public Users loadUserByUsername(String username) throws UsernameNotFoundException {
+        Users users = userRepository.findByUsername(username);
+        if (users == null)
+            throw new AuthExceptionHandle("Username not found");
+        return users;
+    }
 
     @Override
     @Transactional
