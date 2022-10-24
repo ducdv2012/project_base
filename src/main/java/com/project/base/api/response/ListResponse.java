@@ -13,5 +13,7 @@ import java.util.List;
 @Builder
 public class ListResponse {
     private Long totalElements;
+    private Long pageNo;
+    private Long pageSize;
     private List<?> data;
 }

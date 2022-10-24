@@ -22,7 +22,7 @@ public class UserController {
     @GetMapping
     public ApiResponse getList(@RequestParam(name = "search", required = false) String search,
                                @RequestParam(name = "pageNo", defaultValue = "1") Long pageNo,
-                               @RequestParam(name = "pageSize", defaultValue = "1") Long pageSize) {
+                               @RequestParam(name = "pageSize", defaultValue = "20") Long pageSize) {
         return userService.getList(search, pageNo, pageSize);
     }
 

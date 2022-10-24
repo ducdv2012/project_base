@@ -4,15 +4,19 @@ import com.project.base.api.request.RefreshTokenRequest;
 import com.project.base.api.response.RefreshTokenResponse;
 import com.project.base.config.JwtTokenUtil;
 import com.project.base.exception.RefreshTokenExceptionHandle;
-import com.project.base.model.RefreshToken;
+import com.project.base.model.RefreshTokens;
+import com.project.base.model.Tokens;
 import com.project.base.model.Users;
 import com.project.base.repository.RefreshTokenRepository;
+import com.project.base.repository.TokenRepository;
 import com.project.base.repository.UserRepository;
 import com.project.base.service.interfaces.RefreshTokenService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -20,57 +24,56 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Value("${refresh.token.validity}")
     private Long expiryDate;
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Override
-    public RefreshToken createdRefreshToken(Long id) {
-        try {
-            Users users = userRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("User not found"));
-            RefreshToken refreshToken = new RefreshToken();
-            refreshToken.setUsers(users);
-            refreshToken.setToken(UUID.randomUUID().toString());
-            refreshToken.setExpiryDate(LocalDateTime.now().plusSeconds(expiryDate));
-            refreshToken = refreshTokenRepository.save(refreshToken);
-            return refreshToken;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
+    public RefreshTokens createdRefreshToken(Long id) {
+        Users users = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        RefreshTokens refreshTokens = new RefreshTokens();
+        refreshTokens.setUsers(users);
+        refreshTokens.setToken(UUID.randomUUID().toString());
+        refreshTokens.setExpiryDate(LocalDateTime.now().plusSeconds(expiryDate));
+        refreshTokens = refreshTokenRepository.save(refreshTokens);
+        return refreshTokens;
     }
 
     @Override
-    public void refreshToken(RefreshTokenRequest request) {
-        try {
-            String requestRefreshToken = request.getRefreshToken();
+    @Transactional
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
 
-            RefreshToken refreshToken = refreshTokenRepository.findByToken(requestRefreshToken);
-            if (refreshToken == null)
-                throw new RefreshTokenExceptionHandle(requestRefreshToken, "Refresh token is not in database");
+        RefreshTokens refreshTokens = refreshTokenRepository.findByToken(requestRefreshToken);
+        if (refreshTokens == null)
+            throw new RefreshTokenExceptionHandle(requestRefreshToken, "Refresh token is not in database");
 
-            Users users = userRepository.findById(refreshToken.getUsers().getId())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+        Users users = userRepository.findById(refreshTokens.getUsers().getId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-            verifyExpiration(refreshToken);
-            String token = jwtTokenUtil.generateToken(users);
+        verifyExpiration(refreshTokens);
+        String token = jwtTokenUtil.generateToken(users);
 
-            RefreshTokenResponse tokenResponse = new RefreshTokenResponse();
-            tokenResponse.setAccessToken(token);
-            tokenResponse.setRefreshToken(requestRefreshToken);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+        Tokens tokens = Tokens.builder()
+                .token(token)
+                .refreshTokens(refreshTokens)
+                .users(users)
+                .build();
+        tokenRepository.save(tokens);
+
+        RefreshTokenResponse tokenResponse = new RefreshTokenResponse();
+        tokenResponse.setAccessToken(token);
+        tokenResponse.setRefreshToken(requestRefreshToken);
+        return tokenResponse;
     }
 
-    private void verifyExpiration(RefreshToken token) {
+    private void verifyExpiration(RefreshTokens token) {
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.deleteByUsers(token.getUsers());
             throw new RefreshTokenExceptionHandle(token.getToken(), "Refresh token was expired");

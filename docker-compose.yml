@@ -5,8 +5,8 @@ services:
     container_name: postgres
     image: postgres
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       PGDATA: /data/postgres
       TZ: "GMT0"
     volumes:
@@ -18,14 +18,14 @@ services:
       - base-system
     restart: unless-stopped
 
-  be_system:
+  base_system:
     container_name: be_system
     image: base_system_v1
     build:
       context: ./
       dockerfile: Dockerfile
     env_file:
-      - ./.env
+      - ./local.env
     ports:
       - "8181:8181"
     depends_on:

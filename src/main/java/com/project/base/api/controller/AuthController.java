@@ -7,6 +7,8 @@ import com.project.base.service.interfaces.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -28,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ApiResponse logout() {
-        return authService.logout();
+    public ApiResponse logout(final HttpServletRequest request, final HttpServletResponse response) {
+        return authService.logout(request, response);
     }
 }

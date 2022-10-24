@@ -21,7 +21,7 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({RefreshTokenExceptionHandle.class})
-    public ApiResponse refreshTokenHandle(RefreshTokenExceptionHandle ex, WebRequest request) {
+    public ApiResponse refreshTokenHandle(final RefreshTokenExceptionHandle ex, WebRequest request) {
         return new ApiResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     }
 

@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
             users.setEmail(request.getEmail());
             users.setUsername(request.getUsername());
             users.setPassword(passwordEncoder.encode(request.getPassword()));
-            users.setRoles(roles);
+            users.setRoles(new HashSet<>(roles));
             userRepository.save(users);
             return new ApiResponse(HttpStatus.OK.value(), "Create user successfully", users);
         } catch (Exception e) {

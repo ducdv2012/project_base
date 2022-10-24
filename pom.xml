@@ -138,6 +138,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>project-base-system</finalName>
 	</build>
 	<repositories>
 		<repository>

@@ -11,9 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Table(name = "users")
@@ -21,8 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@EntityListeners(AuditingEntityListener.class)
-public class Users extends Audits implements Serializable, UserDetails {
+public class Users extends AuditTable implements Serializable, UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -39,7 +36,7 @@ public class Users extends Audits implements Serializable, UserDetails {
     private String email;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users", fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Roles> roles = new ArrayList<>();
+    private Set<Roles> roles = new HashSet<>();
 
     @JsonIgnore
     @Override

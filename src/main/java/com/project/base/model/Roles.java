@@ -13,8 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "roles")
-@EntityListeners(AuditingEntityListener.class)
-public class Roles extends Audits {
+public class Roles extends AuditTable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,6 +22,7 @@ public class Roles extends Audits {
     private String name;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private Users users;
 }

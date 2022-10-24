@@ -48,6 +48,8 @@ public class CustomUserRepository {
         List<UserListResponse> list = resultList.stream().map(item -> modelMapper.map(item, UserListResponse.class)).collect(Collectors.toList());
         return ListResponse.builder()
                 .totalElements(count)
+                .pageNo(pageNo + 1)
+                .pageSize(pageSize)
                 .data(list)
                 .build();
     }
