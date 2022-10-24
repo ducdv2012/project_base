@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private RefreshTokenService refreshTokenService;
 
     @Override
+    @Transactional
     public ApiResponse authenticate(LoginRequest request) {
         try {
             log.info("----- Start login ----");
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
             accessTokenResponse.setId(users.getId());
             accessTokenResponse.setEmail(users.getEmail());
             accessTokenResponse.setAccessToken(token);
+            accessTokenResponse.setUsername(users.getUsername());
             accessTokenResponse.setRefreshToken(refreshToken.getToken());
             accessTokenResponse.setRoles(roles);
             log.info("------ Login successfully -----");

@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Table(name = "users")
 @Entity
@@ -26,10 +30,12 @@ public class Users extends Audits implements Serializable, UserDetails {
     private String password;
     @Column(name = "email")
     private String email;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "users", fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Roles> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return roles.stream().map(item -> new SimpleGrantedAuthority(item.getName())).collect(Collectors.toList());
     }
 
     @Override

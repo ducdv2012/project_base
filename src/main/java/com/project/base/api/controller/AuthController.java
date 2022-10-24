@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/auth")
 @CrossOrigin
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
