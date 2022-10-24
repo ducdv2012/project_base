@@ -1,7 +1,7 @@
 package com.project.base.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.project.base.util.converter.LocalDateTimeConverter;
+import com.project.base.util.converter.ZoneDateTimeConverter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,11 +10,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,19 +23,19 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class AuditTable implements Serializable {
     @JsonIgnore
-    @Column(name = "created_date", updatable = false, nullable = false)
+    @Column(name = "created_date", updatable = false, nullable = false, columnDefinition = "0")
     @CreatedDate
-    @Convert(converter = LocalDateTimeConverter.class)
-    private LocalDateTime createdDate = LocalDateTime.now();
+    @Convert(converter = ZoneDateTimeConverter.class)
+    private LocalDateTime createdDate;
 
     @JsonIgnore
     @Column(name = "updated_date")
     @LastModifiedDate
-    @Convert(converter = LocalDateTimeConverter.class)
-    private LocalDateTime updatedDate = LocalDateTime.now();
+    @Convert(converter = ZoneDateTimeConverter.class)
+    private LocalDateTime updatedDate;
 
     @JsonIgnore
-    @Column(name = "created_by", updatable = false, nullable = false)
+    @Column(name = "created_by", updatable = false, nullable = false, columnDefinition = "0")
     @CreatedBy
     private Long createdBy;
 
