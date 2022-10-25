@@ -4,7 +4,7 @@ import com.project.base.api.request.RefreshTokenRequest;
 import com.project.base.api.response.ApiResponse;
 import com.project.base.request.LoginRequest;
 import com.project.base.service.interfaces.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,11 +13,11 @@ import javax.validation.Valid;
 
 @RestController
 @CrossOrigin
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ApiResponse authentication(@Valid @RequestBody LoginRequest request) {

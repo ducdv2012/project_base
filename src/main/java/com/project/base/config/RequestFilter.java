@@ -37,12 +37,12 @@ public class RequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = null;
+        String username = null;
         try {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             final String requestTokenHeader = request.getHeader(PREFIX_HEADER);
-            String token = null;
-            String username = null;
             if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
                 response.setStatus(HttpServletResponse.SC_OK);
             }
@@ -67,6 +67,8 @@ public class RequestFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
+            Tokens tokens = tokenRepository.findByToken(token);
+            tokenRepository.deleteToken(tokens.getId());
             printErrorResponse(response, "Token has been expired");
         } catch (Exception e) {
             printErrorResponse(response, e.getMessage());

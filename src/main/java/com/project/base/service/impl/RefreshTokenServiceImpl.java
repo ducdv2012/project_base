@@ -19,8 +19,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
+import java.awt.*;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.time.temporal.ChronoUnit.MILLIS;
 
 @Service
 @Slf4j
@@ -40,13 +47,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshTokens refreshTokens = new RefreshTokens();
         refreshTokens.setUsers(users);
         refreshTokens.setToken(UUID.randomUUID().toString());
-        refreshTokens.setExpiryDate(LocalDateTime.now().plusSeconds(expiryDate));
+        refreshTokens.setExpiryDate(LocalDateTime.now().plus(expiryDate, MILLIS));
         refreshTokens = refreshTokenRepository.save(refreshTokens);
         return refreshTokens;
     }
 
     @Override
-    @Transactional
     public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
@@ -60,10 +66,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         verifyExpiration(refreshTokens);
         String token = jwtTokenUtil.generateToken(users);
 
+        Date expiryDate = jwtTokenUtil.getExpirationDateFromToken(token);
         Tokens tokens = Tokens.builder()
                 .token(token)
                 .refreshTokens(refreshTokens)
                 .users(users)
+                .expiryDate(expiryDate)
                 .build();
         tokenRepository.save(tokens);
 
@@ -73,9 +81,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return tokenResponse;
     }
 
-    private void verifyExpiration(RefreshTokens token) {
+    @Transactional
+    public void verifyExpiration(RefreshTokens token) {
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            refreshTokenRepository.deleteByUsers(token.getUsers());
+            List<Tokens> tokensList = tokenRepository.findAllByUsers(token.getUsers());
+            List<Tokens> tokenInvalid = tokensList.stream().filter(t -> t.getExpiryDate().before(new Date())).collect(Collectors.toList());
+            if (tokenInvalid.equals(tokensList)) {
+                List<Long> tokenIds = tokensList.stream().map(Tokens::getId).collect(Collectors.toList());
+                tokenRepository.deleteAllByTokens(tokenIds);
+                refreshTokenRepository.deleteByUsers(token.getUsers());
+            } else {
+                List<Long> tokenIds = tokenInvalid.stream().map(Tokens::getId).collect(Collectors.toList());
+                tokenRepository.deleteAllByTokens(tokenIds);
+            }
             throw new RefreshTokenExceptionHandle(token.getToken(), "Refresh token was expired");
         }
     }

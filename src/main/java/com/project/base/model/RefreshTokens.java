@@ -17,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "refresh_token")
-public class RefreshTokens {
+public class RefreshTokens extends AuditTable {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

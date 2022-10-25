@@ -28,7 +28,6 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
         String authorization = request.getHeader(PREFIX_HEADER);
         try {
             if (SecurityContextHolder.getContext().getAuthentication() != null && StringUtils.isNotBlank(authorization)) {
-//                long userId = ParserToken.getUserId(authorization);
                 Claims claims = jwtTokenUtil.getAllClaimsFromToken(authorization.substring(7));
                 String userId = claims.get("id").toString();
                 return Optional.of(Long.parseLong(userId));

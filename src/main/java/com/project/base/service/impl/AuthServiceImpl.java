@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,6 +75,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             RefreshTokens refreshTokens = refreshTokenService.createdRefreshToken(users.getId());
             List<String> roles = users.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
+            Date expiryDate = jwtTokenUtil.getExpirationDateFromToken(token);
             AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                     .type("Bearer")
                     .id(users.getId())
@@ -82,12 +84,14 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                     .username(users.getUsername())
                     .email(users.getEmail())
                     .roles(roles)
+                    .expiryDate(expiryDate)
                     .build();
 
             Tokens tokens = Tokens.builder()
                     .token(token)
                     .refreshTokens(refreshTokens)
                     .users(users)
+                    .expiryDate(expiryDate)
                     .build();
             tokenRepository.save(tokens);
             log.info("------ Login successfully -----");
@@ -121,7 +125,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             String token = requestTokenHeader.substring(PREFIX_TOKEN.length() + 1);
             Tokens tokens = tokenRepository.findByToken(token);
             if (tokens != null)
-                tokenRepository.deleteToken(tokens.getId());
+                tokenRepository.deleteById(tokens.getId());
             return new ApiResponse(HttpStatus.OK.value(), "Logged out successfully");
         } catch (Exception e) {
             log.error(e.getMessage());

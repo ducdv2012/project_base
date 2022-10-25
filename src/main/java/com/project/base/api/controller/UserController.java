@@ -35,7 +35,7 @@ public class UserController {
     public ApiResponse create(@RequestBody UserRequest request, BindingResult result) {
         Map<String, String> map = commonService.mapValidationService(result);
         if (map != null) {
-            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Has some field is bad request");
+            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Has some field is bad request", map);
         }
         return userService.create(request);
     }
@@ -44,7 +44,7 @@ public class UserController {
     public ApiResponse update(@RequestBody UserRequest request, BindingResult result) {
         Map<String, String> map = commonService.mapValidationService(result);
         if (map != null) {
-            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Has some field is bad request");
+            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Has some field is bad request", map);
         }
         return userService.update(request);
     }
